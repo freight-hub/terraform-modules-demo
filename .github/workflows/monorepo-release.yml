@@ -1,0 +1,57 @@
+name: 'Monorepo: Release'
+on:
+  repository_dispatch:
+    types: [monorepo_release]
+
+jobs:
+
+  tag:
+    runs-on: ubuntu-latest
+    name: 'Tag Releases'
+    steps:
+
+      - uses: actions/github-script@v2
+        env:
+          CLIENT_PAYLOAD: ${{ toJSON(github.event.client_payload) }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { sha, releases } = JSON.parse(process.env.CLIENT_PAYLOAD);
+
+            for (const release of releases) {
+              const tagName = `rel/${release.module}/${release.newVersion}`;
+
+              const ref = `refs/tags/${tagName}`;
+              console.log('Tagging', tagName, 'as', sha);
+              await github.git.createRef({ owner, repo, ref, sha });
+            }
+
+  upload:
+    runs-on: ubuntu-latest
+    name: 'Upload Release'
+    steps:
+
+      - uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: unused
+          run_id: ${{ github.event.client_payload.run_id }}
+          path: outputs
+      - name: Configure AWS credentials # only reason to use this is for possible future usage of assumed role
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+      - name: 'Upload the files!'
+        working-directory: outputs
+        run: |
+          for module in *
+          do
+            echo "Looking at $module"
+            pwd
+            pushd  $module
+            pwd
+            ls -Rsh .
+            aws s3 cp terraform-module.zip  s3://forto-terrform-modules-demo/$module-$(cat new-version.txt).zip
+            popd
+          done
