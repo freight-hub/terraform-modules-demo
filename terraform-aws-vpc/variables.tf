@@ -1,3 +1,10 @@
+variable "example_variable" {
+  description = "An example variable to showcase the module release process"
+  type        = bool
+  default     = true
+}
+
+
 variable "create_vpc" {
   description = "Controls if VPC should be created (it affects almost all resources)"
   type        = bool
