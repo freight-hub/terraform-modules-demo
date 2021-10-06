@@ -1,2 +1,7 @@
-<- THIS TEXT WILL BE ADDED TO THE TF MODULE CHANGE LOG !!!
-PLEASE REPLACE WITH SOMETHING MEANINGFUL ->
+<!-- Describe your Pull Request here, as normal :) -->
+
+## Changelog entry
+```
+TODO: Replace this inner text with a useful message
+for users of the affected modules!
+```
