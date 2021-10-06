@@ -119,7 +119,7 @@ jobs:
             return numbers.join('.');
           result-encoding: string
 
-      - name: Store new version number
+      - name: Store version numbers
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -127,8 +127,36 @@ jobs:
           mkdir output
           echo '${{ steps.prev-version.outputs.result }}' > output/previous-version.txt
           echo '${{ steps.new-version.outputs.result }}' > output/new-version.txt
-          echo "* PR [#${{ github.event.pull_request.number }}]($PR_URL) - $(gh pr view $PR_URL --json title --jq .title )" > output/changelog.md
-          echo -e "\n\n\`\`\`\n$(gh pr view $PR_URL --json body --jq .body  )\n\`\`\`" >> output/changelog.md
+
+      - name: Extract changelog entry
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { data: prInfo } = await github.rest.pulls.get({
+              owner, repo,
+              pull_number: context.issue.number,
+            });
+            console.log('Found PR body:|');
+            console.log(prInfo.body);
+
+            const changelogEntry = ((prInfo.body
+              .split(/^#+ ?/m)
+              .find(x => x.startsWith('Changelog'))
+              || '').split(/^```/m)[1] || '').trim();
+            if (!changelogEntry)
+              throw `'Changelog' section not found in PR body! Please add it back.`;
+            if (changelogEntry.match(/^TODO:/m))
+              throw `'Changelog' section needs proper text, instead of 'TODO'`;
+
+            const { writeFile } = require('fs').promises;
+            await writeFile('output/changelog.md', `
+            * PR [#${ prInfo.number }](${ prInfo.html_url }) - ${ prInfo.title }
+
+            \`\`\`
+            ${changelogEntry}
+            \`\`\`
+            `.trimLeft(), { encoding: 'utf-8' })
 
       - name: Document example 'source' line
         run: |
