@@ -18,6 +18,10 @@ output "default_security_group_id" {
   value       = concat(aws_vpc.this.*.default_security_group_id, [""])[0]
 }
 
+
+
+
+
 output "default_network_acl_id" {
   description = "The ID of the default network ACL"
   value       = concat(aws_vpc.this.*.default_network_acl_id, [""])[0]
