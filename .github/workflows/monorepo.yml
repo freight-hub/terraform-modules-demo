@@ -302,7 +302,7 @@ jobs:
         env:
           RELEASE_LIST: '${{ steps.extract-releases.outputs.result }}'
         with:
-          github-token: ${{ secrets.GH_PAT_FREIGHTBOT }}
+          github-token: ${{ secrets.CI_TOKEN }}
           script: |
             const payload = {
               run_id: "${{ github.run_id }}",
