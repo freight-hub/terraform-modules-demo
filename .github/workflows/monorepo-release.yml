@@ -36,7 +36,7 @@ jobs:
           workflow: unused
           run_id: ${{ github.event.client_payload.run_id }}
           path: outputs
-          
+
       - name: Configure AWS credentials # only reason to use this is for possible future usage of assumed role
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -60,6 +60,6 @@ jobs:
             pushd  $module
             pwd
             ls -Rsh .
-            aws s3 cp terraform-module.zip  s3://forto-terrform-modules-demo/$module-$(cat new-version.txt).zip
+            aws s3 cp terraform-module.zip  s3://neo-iac-terraform-modules/$module-$(cat new-version.txt).zip
             popd
           done
