@@ -36,12 +36,20 @@ jobs:
           workflow: unused
           run_id: ${{ github.event.client_payload.run_id }}
           path: outputs
+          
       - name: Configure AWS credentials # only reason to use this is for possible future usage of assumed role
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1
+          aws-region: eu-central-1
+          
+      # - name: Configure AWS Credentials
+      #   uses: aws-actions/configure-aws-credentials@v4 # nosemgrep
+      #   with:
+      #     role-to-assume: arn:aws:iam::240787475621:role/github-admin
+      #     aws-region: ${{env.AWS_REGION}}
+
       - name: 'Upload the files!'
         working-directory: outputs
         run: |
